@@ -1,7 +1,8 @@
 // 初始化整个游戏的精灵，作为游戏开始的入口
 import {ResourceLoader} from "./js/base/ResourceLoader.js";
+import {BackGround} from "./js/runtime/BackGround.js";
+import {Datastore} from "./js/base/Datastore.js";
 import {Director} from "./js/Director.js";
-import {BackGround} from "./js/runtime/BackGround";
 
 export class Main {
     constructor() {
@@ -9,6 +10,7 @@ export class Main {
         //用this定义，就说明是整个类的变量了，在任何方法都可以直接使用
         this.canvas = document.getElementById('game_canvas');
         this.ctx = this.canvas.getContext('2d');
+        this.dataStore = Datastore.getInstance();
         const loader = ResourceLoader.create();
         loader.onLoaded(map => this.onResourceFirstLoaded(map))
         // Director.getinstance();
@@ -37,8 +39,16 @@ export class Main {
     }
 
     onResourceFirstLoaded(map) {
+        //长期保存
+        this.dataStore.ctx = this.ctx;
+        this.dataStore.res = map;
+        this.init();
+    }
+
+    init() {
         //背景的初始化和渲染
-        let background = new BackGround(this.ctx,map.get('background'));
-        background.draw();
+        this.dataStore.put('background',
+            new BackGround(this.ctx, this.dataStore.res.get('background')));
+        Director.getinstance().run();
     }
 }
